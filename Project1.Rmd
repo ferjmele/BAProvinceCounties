@@ -1,0 +1,34 @@
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Counties of Buenos Aires Province in Argentina
+Date issued : `r Sys.Date()`  
+
+Circles are located in a reference point of county and are coloured according to 3 categories:  
+Big   : Population above 500.000   
+Medium: Population between 100.000 and 500.000  
+Small : Population below 100.000  
+*Circle size is proportional to County population*  
+
+
+**Click on circles to display name and population**  
+
+```{r}
+library(leaflet)
+library(knitr)
+library(rmarkdown)
+base<-read.csv("BasePBA.csv", header=FALSE)
+names(base)<-c("County", "long", "lat", "Population", "Category")
+base$colores<-"red"
+base[base$Category=="Medium",6]<-"yellow"
+base[base$Category=="Small",6]<-"green"
+newmap<-leaflet(data=base)
+newmap<-addTiles(newmap, urlTemplate ="http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+newmap<-addCircleMarkers(newmap, lng=base$long, lat=base$lat, radius=4*log10(base$Population/10000), weight=2, color=base$colores, popup=paste0(base$County," ", as.character(base$Population)))
+newmap<-setView(newmap, lat= base[121,3], lng=base[121,2], zoom=1)
+newmap<-addLegend(newmap, position="bottomright", labels=c("Big (>500000)", "Medium (>100000 <500000)", "Small (<100000)"), colors=c("red", "yellow", "green"))
+newmap
+```
